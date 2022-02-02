@@ -23,8 +23,8 @@ knitr::opts_knit$set(root.dir='..')
 ```{r dataread, warning=F,message=F}
 ####-----Reading in Data and Stacking it ----- ####
 #Reading in files
-files <- list.files('C:/Users/hp/Documents/ESS580/Homework/2_fire_data_wrangle/data',full.names=T)
-##'data' will work
+files <- list.files('data',full.names=T)
+##'data' will work if not inline printing
 
 
 #Read in individual data files
@@ -66,9 +66,11 @@ full_wide<-spread(full_long, key='data', value='value')%>%
   filter( month %in% c(5,6,7,8,9))
 
 ggplot(full_wide, aes(x=ndmi, y=ndvi,color=site ))+
-  geom_point(shape=1)+
-  theme_few()
-
+  geom_point(shape=1) + 
+  theme_few() + 
+  scale_color_few() + 
+  theme(legend.position=c(0.8,0.8))
+print("There is a positive correlation between NDMI and NDVI for the summer months")
 
 ```
 ## Question 2 
@@ -78,23 +80,28 @@ ggplot(full_wide, aes(x=ndmi, y=ndvi,color=site ))+
 In other words, does the previous year's snow cover influence vegetation
  growth for the following summer?
 ```{r}
-full_spread<-spread(full_long, key='data', value='value')%>%
-  mutate(year=year(DateTime),month=month(DateTime))%>%
-  group_by(site, month)%>%
-  summarise(meanNSDI=mean(ndsi%>%
-  filter( month %in% c(1,2,3,4))), meanNDVI=mean(ndvi%>%
-  filter( month %in% c(7,8,9))))
 
-
-summer<-spread(full_long, key='data', value='value')%>%
+f_ndsi<-filter(full_long, data=='ndsi')%>%
   mutate(year=year(DateTime),month=month(DateTime))%>%
-  filter( month %in% c(7,8,9))
+  filter(month%in% c(1,2,3,4))%>%
+  group_by(year)%>%
+  summarise(mean_ndsi=mean(value))
 
-winter<-spread(full_long, key='data', value='value')%>%
+f_ndvi<-filter(full_long, data=='ndvi')%>%
   mutate(year=year(DateTime),month=month(DateTime))%>%
-  filter( month %in% c(1,2,3,4))
+  filter(month%in% c(7,8,9))%>%
+  group_by(year)%>%
+  summarise(mean_ndvi=mean(value))
+
+all_year<-inner_join(f_ndsi, f_ndvi, by='year')
   
-ggplot(full_spread, aes(x=ndsi, y=ndvi, color=site))
+ggplot(all_year, aes(x=mean_ndsi, y=mean_ndvi))+ 
+  geom_point() + 
+  theme_few() + 
+  scale_color_few() + 
+  theme(legend.position=c(0.8,0.8))
+print("There is a weak positive correlation between NSDI and NDVI")
+
 ```
 ## Q3
 
@@ -102,20 +109,40 @@ How is the snow effect from question 2 different between pre- and post-burn
 and burned and unburned? 
 
 ```{r}
+ndsi3<-filter(full_long, data=='ndsi')%>%
+  mutate(year=year(DateTime),month=month(DateTime))%>%
+  filter(month%in% c(1,2,3,4))%>%
+  group_by(year,site)%>%
+  summarise(mean_ndsi=mean(value))
 
+ndvi3<-filter(full_long, data=='ndvi')%>%
+  mutate(year=year(DateTime),month=month(DateTime))%>%
+  filter(month%in% c(7,8,9))%>%
+  group_by(year,site)%>%
+  summarise(mean_ndvi=mean(value))
+
+all_year3<-left_join(ndsi3, ndvi3)
+
+ggplot(all_year3, aes(x=mean_ndsi, y=mean_ndvi, color=site))+ 
+  geom_point() + 
+  theme_few() + 
+  scale_color_few()
+message("The burned sites are more impacted by the previous years snow than the unburned sites")
 ```
 ## Question 4
 
 What month is the greenest month on average? 
 
 ```{r}
+#plot it?
 monthlygreen<-spread(full_long, key='data', value='value')%>%
   mutate(month=month(DateTime))%>%
   group_by( month)%>%
   summarise(meanNdvi=mean(ndvi, na.rm=TRUE))
 
 Q4<-with(monthlygreen, month[which.max(meanNdvi)])
-view(Q4)
+print(Q4)
+message("On average the greenest month is the ", Q4, "th month.")
 ```
 
 
@@ -129,7 +156,8 @@ snowy<-spread(full_long, key='data', value='value')%>%
   summarise(meanNdsi=mean(ndsi, na.rm=TRUE))
 
 Q5<-with(snowy, month[which.max(meanNdsi)])
-view(Q5)
+print(Q5)
+message("On average the snowiest month is the ", Q5, "st month.")
 ```
 
 ## Bonus Question: Redo all problems with `spread` and `gather` using modern tidyverse syntax. 
