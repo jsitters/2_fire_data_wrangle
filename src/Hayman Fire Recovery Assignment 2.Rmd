@@ -1,7 +1,7 @@
 ---
 title: "Hayman Fire Recovery"
 author: "Jan Sitterson"
-date: "2/2/2022"
+date: "2/3/2022"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -70,7 +70,7 @@ ggplot(full_wide, aes(x=ndmi, y=ndvi,color=site ))+
   theme_few() + 
   scale_color_few() + 
   theme(legend.position=c(0.8,0.8))
-print("There is a positive correlation between NDMI and NDVI for the summer months")
+print("There is a positive correlation between NDMI and NDVI for the summer months. This indicates that seasonal moisture impacts vegetation growth. ")
 
 ```
 ## Question 2 
@@ -100,7 +100,7 @@ ggplot(all_year, aes(x=mean_ndsi, y=mean_ndvi))+
   theme_few() + 
   scale_color_few() + 
   theme(legend.position=c(0.8,0.8))
-print("There is a weak positive correlation between NSDI and NDVI")
+print("There is a weak positive correlation between NSDI and NDVI. This indicates that the previous years' snow cover influences the vegetation growth.")
 
 ```
 ## Q3
@@ -127,7 +127,7 @@ ggplot(all_year3, aes(x=mean_ndsi, y=mean_ndvi, color=site))+
   geom_point() + 
   theme_few() + 
   scale_color_few()
-message("The burned sites are more impacted by the previous years snow than the unburned sites")
+message("The burned sites (blue) are more impacted by the previous years snow than the unburned (orange) sites")
 ```
 ## Question 4
 
