@@ -140,6 +140,12 @@ monthlygreen<-spread(full_long, key='data', value='value')%>%
   group_by( month)%>%
   summarise(meanNdvi=mean(ndvi, na.rm=TRUE))
 
+ggplot(monthlygreen, aes(x=month, y=meanNdvi))+ 
+  geom_point() + 
+  theme_few() + 
+  scale_color_few()+ 
+  scale_x_continuous(name="Month Number", limits=c(1, 12), breaks=c(2,4,6,8,10,12))
+
 Q4<-with(monthlygreen, month[which.max(meanNdvi)])
 print(Q4)
 message("On average the greenest month is the ", Q4, "th month.")
@@ -154,6 +160,12 @@ snowy<-spread(full_long, key='data', value='value')%>%
   mutate(month=month(DateTime))%>%
   group_by( month)%>%
   summarise(meanNdsi=mean(ndsi, na.rm=TRUE))
+
+ggplot(snowy, aes(x=month, y=meanNdsi))+ 
+  geom_point() + 
+  theme_few() + 
+  scale_color_few()+ 
+  scale_x_continuous(name="Month Number", limits=c(1, 12), breaks=c(2,4,6,8,10,12))
 
 Q5<-with(snowy, month[which.max(meanNdsi)])
 print(Q5)
